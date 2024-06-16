@@ -5,9 +5,10 @@ model = AskMeAnything()
 
 
 def load_document(file, url):
-    print(file, url)
     if url is not None and url != "":
         model.load_context_from_wiki(url)
+    if file is not None:
+        model.load_context_from_txt(file.name)
     return "Document loaded. You can now ask questions."
 
 # Function to generate answers based on the document
@@ -22,7 +23,8 @@ def ask_question(question):
 file_input = gr.File(label="Upload Document")
 ulr_input = gr.Textbox(
     lines=1, placeholder="Paste the Wikipedia URL here...", label="Wikipedia URL")
-text_input = gr.Textbox(lines=2, placeholder="Enter your question here...")
+text_input = gr.Textbox(
+    lines=2, placeholder="Enter your question here...", label="Your Question")
 text_output = gr.Textbox(label="Possible Answers:")
 
 iface = gr.Interface(

@@ -28,3 +28,16 @@ def mean_pooling(model_output, attention_mask):
     input_mask_expanded = attention_mask.unsqueeze(
         -1).expand(token_embeddings.size()).float()
     return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+
+def read_and_split_paragraphs(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+
+    # Split the content into paragraphs
+    paragraphs = content.split('\n')
+
+    # Remove any leading/trailing whitespace from each paragraph
+    paragraphs = [para.strip() for para in paragraphs if para.strip()]
+
+    return paragraphs

@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering
 import torch
 import torch.nn.functional as F
 
-from utils import mean_pooling, get_wikipedia_text
+from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs
 
 
 class AskMeAnything:
@@ -42,6 +42,10 @@ class AskMeAnything:
     def load_context_from_wiki(self, url: str):
         # self.context = get_wikipedia_text(url).split('.')
         self.context = get_wikipedia_text(url)
+        self.context_embeddings = self.embed(self.context)
+
+    def load_context_from_txt(self, path: str):
+        self.context = read_and_split_paragraphs(path)
         self.context_embeddings = self.embed(self.context)
 
     def answer_from_context(self, question: str) -> str:
