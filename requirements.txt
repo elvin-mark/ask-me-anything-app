@@ -1,0 +1,4 @@
+torch==1.11.0
+gradio==3.16.2
+transformers==4.41.1
+bs4==0.0.1
