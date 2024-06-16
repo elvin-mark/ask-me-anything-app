@@ -15,11 +15,14 @@ def load_document(file, url):
 # Function to generate answers based on the document
 
 
-def ask_question(question, audio):
+def ask_question(question, audio, best):
     print(question, audio)
     if question is not None and question != "":
-        answers = model.answer_from_context(question)
-        return "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
+        answers = model.answer_from_context(question, best)
+        if best:
+            return answers
+        else:
+            return "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
     if audio is not None:
         pass
         return "No answers"
@@ -32,11 +35,13 @@ ulr_input = gr.Textbox(
 text_input = gr.Textbox(
     lines=2, placeholder="Enter your question here...", label="Your Question")
 audio_input = gr.Audio(sources=["microphone"])
+best_flag_input = gr.Checkbox(
+    label="Best Answer", info="Just give the best answer", value=True)
 text_output = gr.Textbox(label="Possible Answers:")
 
 iface = gr.Interface(
     fn=ask_question,
-    inputs=[text_input, audio_input],
+    inputs=[text_input, audio_input, best_flag_input],
     outputs=text_output,
     title="Document Q&A Chatbot",
     description="Upload a document and ask questions about it."
@@ -55,4 +60,4 @@ iface_upload = gr.Interface(
 app = gr.TabbedInterface([iface_upload, iface], [
                          "Upload Document", "Ask Questions"])
 
-app.launch()
+app.launch(server_name="0.0.0.0", server_port=8080)

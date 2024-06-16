@@ -48,8 +48,15 @@ class AskMeAnything:
         self.context = read_and_split_paragraphs(path)
         self.context_embeddings = self.embed(self.context)
 
-    def answer_from_context(self, question: str) -> str:
+    def answer_from_context(self, question: str, best=False) -> str:
         emb_question = self.embed(question)
+
+        if best:
+            # If best flag is True return just the best answer
+            idx = torch.argmax(self.context_embeddings @ emb_question.T).item()
+            return self.answer(question, self.context[idx])
+
+        # If best flag is set to False then give the 5 best answers
         possible_paragraphs = torch.topk(
             self.context_embeddings @ emb_question.T, k=5, axis=0)
         possible_paragraphs = possible_paragraphs.indices.tolist()
@@ -57,5 +64,3 @@ class AskMeAnything:
         for idx in possible_paragraphs:
             possible_ans.append(self.answer(question, self.context[idx[0]]))
         return possible_ans
-        # idx = torch.argmax(self.context_embeddings @ emb_question.T).item()
-        # return self.answer(question, self.context[idx])
