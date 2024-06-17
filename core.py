@@ -1,22 +1,26 @@
 from typing import List, Union
 
-from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering
+from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering, WhisperProcessor, WhisperForConditionalGeneration
 import torch
 import torch.nn.functional as F
 
-from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs
+from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,resample_audio
 
 
 class AskMeAnything:
     def __init__(self):
         self.qa_model_name = "deepset/roberta-base-squad2"
         self.emb_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
+        self.asr_model_name = 'openai/whisper-tiny.en'
 
         self.qa_model = AutoModelForQuestionAnswering.from_pretrained(
             self.qa_model_name)
         self.qa_tokenizer = AutoTokenizer.from_pretrained(self.qa_model_name)
         self.emb_model = AutoModel.from_pretrained(self.emb_model_name)
         self.emb_tokenizer = AutoTokenizer.from_pretrained(self.emb_model_name)
+
+        self.asr_processor = WhisperProcessor.from_pretrained(self.asr_model_name)
+        self.asr_model = WhisperForConditionalGeneration.from_pretrained(self.asr_model_name)
 
     def answer(self, question: str, context: str) -> str:
         inputs = self.qa_tokenizer(question, context, return_tensors="pt")
@@ -64,3 +68,12 @@ class AskMeAnything:
         for idx in possible_paragraphs:
             possible_ans.append(self.answer(question, self.context[idx[0]]))
         return possible_ans
+
+    def transcript(self, audio_arr, sampling_rate: int):
+        resample_audio_arr, _  = resample_audio(audio_arr,sampling_rate, 16000)
+        input_features = self.asr_processor(resample_audio_arr, sampling_rate=16000, return_tensors="pt").input_features 
+        predicted_ids = self.asr_model.generate(input_features)
+        transcription = self.asr_processor.batch_decode(predicted_ids, skip_special_tokens=True)
+        if len(transcription) > 0:
+            return transcription[0]
+        return ""

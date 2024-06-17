@@ -16,17 +16,21 @@ def load_document(file, url):
 
 
 def ask_question(question, audio, best):
-    print(question, audio)
     if question is not None and question != "":
         answers = model.answer_from_context(question, best)
         if best:
-            return answers
+            return question, answers
         else:
-            return "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
+            return question, "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
     if audio is not None:
-        pass
-        return "No answers"
-
+        sampling_rate, audio_arr = audio
+        question = model.transcript(audio_arr,sampling_rate)
+        answers = model.answer_from_context(question, best)
+        if best:
+            return question, answers
+        else:
+            return question, "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
+    return "", ""
 
 # Create the Gradio interface
 file_input = gr.File(label="Upload Document")
@@ -37,12 +41,13 @@ text_input = gr.Textbox(
 audio_input = gr.Audio(sources=["microphone"])
 best_flag_input = gr.Checkbox(
     label="Best Answer", info="Just give the best answer", value=True)
+text_question_ref = gr.Textbox(label="Your question was:")
 text_output = gr.Textbox(label="Possible Answers:")
 
 iface = gr.Interface(
     fn=ask_question,
     inputs=[text_input, audio_input, best_flag_input],
-    outputs=text_output,
+    outputs=[text_question_ref,text_output],
     title="Document Q&A Chatbot",
     description="Upload a document and ask questions about it."
 )

@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import torch
-
+from scipy.signal import resample
+import numpy as np
 
 def get_wikipedia_text(url):
     response = requests.get(url)
@@ -41,3 +42,18 @@ def read_and_split_paragraphs(file_path):
     paragraphs = [para.strip() for para in paragraphs if para.strip()]
 
     return paragraphs
+
+def resample_audio(audio_data, original_rate, new_rate):
+    # Convert int16 to float64
+    audio_data_float64 = audio_data.astype(np.float64) / 32768.0
+
+    # Determine the duration in seconds
+    duration = len(audio_data_float64) / original_rate
+    
+    # Calculate the number of samples for the new rate
+    new_num_samples = int(duration * new_rate)
+    
+    # Resample the audio data
+    resampled_audio_data = resample(audio_data_float64, new_num_samples)
+    
+    return resampled_audio_data, new_rate
