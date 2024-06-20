@@ -2,3 +2,5 @@ torch==1.11.0
 gradio==4.36.1
 transformers==4.41.1
 bs4==0.0.2
+numpy==1.23.5
+scipy==1.9.3
