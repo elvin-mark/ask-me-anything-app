@@ -1,10 +1,10 @@
 from typing import List, Union
 
-from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering, WhisperProcessor, WhisperForConditionalGeneration
+from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering, WhisperProcessor, WhisperForConditionalGeneration,VitsModel
 import torch
 import torch.nn.functional as F
 
-from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,resample_audio
+from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,resample_audio,save_audio
 
 
 class AskMeAnything:
@@ -12,6 +12,7 @@ class AskMeAnything:
         self.qa_model_name = "deepset/roberta-base-squad2"
         self.emb_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
         self.asr_model_name = 'openai/whisper-tiny.en'
+        self.tts_model_name = "facebook/mms-tts-eng"
 
         self.qa_model = AutoModelForQuestionAnswering.from_pretrained(
             self.qa_model_name)
@@ -21,6 +22,9 @@ class AskMeAnything:
 
         self.asr_processor = WhisperProcessor.from_pretrained(self.asr_model_name)
         self.asr_model = WhisperForConditionalGeneration.from_pretrained(self.asr_model_name)
+
+        self.tts_model = VitsModel.from_pretrained(self.tts_model_name)
+        self.tts_tokenizer = AutoTokenizer.from_pretrained(self.tts_model_name)
 
     def answer(self, question: str, context: str) -> str:
         inputs = self.qa_tokenizer(question, context, return_tensors="pt")
@@ -55,18 +59,23 @@ class AskMeAnything:
     def answer_from_context(self, question: str, best=False) -> str:
         emb_question = self.embed(question)
 
-        if best:
-            # If best flag is True return just the best answer
-            idx = torch.argmax(self.context_embeddings @ emb_question.T).item()
-            return self.answer(question, self.context[idx])
-
-        # If best flag is set to False then give the 5 best answers
         possible_paragraphs = torch.topk(
-            self.context_embeddings @ emb_question.T, k=5, axis=0)
+        self.context_embeddings @ emb_question.T, k=5, axis=0)
         possible_paragraphs = possible_paragraphs.indices.tolist()
         possible_ans = []
         for idx in possible_paragraphs:
             possible_ans.append(self.answer(question, self.context[idx[0]]))
+        if best:
+            # If best flag is True return just the best answer
+            # idx = torch.argmax(self.context_embeddings @ emb_question.T).item()
+            # return self.answer(question, self.context[idx])
+            for ans in possible_ans:
+                if len(ans) > 0 and ans != '<s>' and ans != ' ':
+                    return ans
+            # Default to the one with the highest probability
+            return possible_ans[0]
+
+        # If best flag is set to False then give the 5 best answers
         return possible_ans
 
     def transcript(self, audio_arr, sampling_rate: int):
@@ -77,3 +86,10 @@ class AskMeAnything:
         if len(transcription) > 0:
             return transcription[0]
         return ""
+    
+    def speech(self,text:str):
+        inputs = self.tts_tokenizer(text, return_tensors="pt")
+
+        with torch.no_grad():
+            output = self.tts_model(**inputs).waveform
+        save_audio(data=output.float().numpy(),rate=self.tts_model.config.sampling_rate)

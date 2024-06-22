@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import torch
 from scipy.signal import resample
+import scipy
 import numpy as np
 
 def get_wikipedia_text(url):
@@ -57,3 +58,6 @@ def resample_audio(audio_data, original_rate, new_rate):
     resampled_audio_data = resample(audio_data_float64, new_num_samples)
     
     return resampled_audio_data, new_rate
+
+def save_audio(data:any,rate:int,audio_path="tmp.wav"):
+    scipy.io.wavfile.write(audio_path, rate=rate, data=data[0])
