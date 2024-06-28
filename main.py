@@ -21,7 +21,7 @@ def ask_question(question, audio, best):
         sampling_rate, audio_arr = audio
         question = model.transcript(audio_arr,sampling_rate)
 
-    answers = model.answer_from_context(question, best)
+    answers = model.answer(question, best)
     
     if not best:
         answers = "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
@@ -47,6 +47,7 @@ iface = gr.Interface(
     fn=ask_question,
     inputs=[text_input, audio_input, best_flag_input],
     outputs=[text_question_ref,text_output,audio_output],
+    examples=[["What is physics?"]],
     title="Document Q&A Chatbot",
     description="Upload a document and ask questions about it."
 )
@@ -56,6 +57,7 @@ iface_upload = gr.Interface(
     fn=load_document,
     inputs=[file_input, ulr_input],
     outputs="text",
+    examples=[[None,"https://en.wikipedia.org/wiki/Physics"]],
     title="Upload Document",
     description="Upload a document to ask questions about it."
 )
