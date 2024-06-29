@@ -7,21 +7,23 @@ model = AskMeAnything()
 def load_document(file, url):
     if url is not None and url != "":
         model.load_context_from_wiki(url)
+        model.save_current_context()
         return "Document loaded. You can now ask questions."
     if file is not None:
         model.load_context_from_txt(file.name)
+        model.save_current_context()
         return "Document loaded. You can now ask questions."
     return "No context was loaded"
+
+
 # Function to generate answers based on the document
-
-
-def ask_question(question, audio, best):
+def ask_question(question, audio, best,use_memory):
     answers = ""
     if audio is not None and question == "":
         sampling_rate, audio_arr = audio
         question = model.transcript(audio_arr,sampling_rate)
 
-    answers = model.answer(question, best)
+    answers = model.answer(question, best,use_memory)
     
     if not best:
         answers = "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
@@ -39,15 +41,17 @@ text_input = gr.Textbox(
 audio_input = gr.Audio(sources=["microphone"])
 best_flag_input = gr.Checkbox(
     label="Best Answer", info="Just give the best answer", value=True)
+use_memory_input = gr.Checkbox(
+    label="Memory", info="Use memory", value=False)
 text_question_ref = gr.Textbox(label="Your question was:")
 text_output = gr.Textbox(label="Possible Answers:")
 audio_output =gr.Audio()
 
 iface = gr.Interface(
     fn=ask_question,
-    inputs=[text_input, audio_input, best_flag_input],
+    inputs=[text_input, audio_input, best_flag_input,use_memory_input],
     outputs=[text_question_ref,text_output,audio_output],
-    examples=[["What is physics?"]],
+    examples=[["What is physics?"],["What is mathematics?"],["What is chemistry?"]],
     title="Document Q&A Chatbot",
     description="Upload a document and ask questions about it."
 )
@@ -57,7 +61,7 @@ iface_upload = gr.Interface(
     fn=load_document,
     inputs=[file_input, ulr_input],
     outputs="text",
-    examples=[[None,"https://en.wikipedia.org/wiki/Physics"]],
+    examples=[[None,"https://en.wikipedia.org/wiki/Physics"],[None,"https://en.wikipedia.org/wiki/Mathematics"],[None,"https://en.wikipedia.org/wiki/Chemistry"]],
     title="Upload Document",
     description="Upload a document to ask questions about it."
 )
