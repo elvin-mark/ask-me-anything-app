@@ -2,9 +2,11 @@
 
 # About
 
-Ask Me Anything App is an app aim to be a simple AI assistant to help you find answers through multiple source materials.
+Ask Me Anything App is an app aiming to be a simple AI assistant to help you find answers through multiple source materials. It allows you to upload files or send a URL to extract the text from that page. After you have upload you source materials, you can start asking questions that may be found in those source materials. You can ask by typing your question or by using the speech recognition functionality to just speak your question. Then you will receive the answer via text and an automatic generated speech.
 
 # Models being used
+
+Here are all the models that are being used by this application. 
 
 - [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2): used for indexing the paragraphs.
 - [deepset/roberta-base-squad2](https://huggingface.co/deepset/roberta-base-squad2): used to find the answer within the paragraph

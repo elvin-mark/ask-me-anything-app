@@ -8,6 +8,8 @@ from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,re
 
 class Knowledge:
     def __init__(self):
+        # Load the LLM model to embed text
+        # Embed Dimension: 384
         self.emb_model_name = 'sentence-transformers/all-MiniLM-L6-v2'
 
         self.emb_model = AutoModel.from_pretrained(self.emb_model_name)
