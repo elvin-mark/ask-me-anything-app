@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModel, AutoModelForQuestionAnswering
 import torch
 import torch.nn.functional as F
 
-from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,resample_audio,save_audio
+from utils import mean_pooling, get_wikipedia_text, read_and_split_paragraphs,resample_audio,save_audio, split_paragraphs
 
 @dataclass
 class Config:
@@ -88,9 +88,18 @@ class Knowledge(DocumentManager):
          # Load all paragraphs from a file
         paragraphs = read_and_split_paragraphs(path)
         # Calculate the embeddings from all paragraphs
-        embeddings = self.embed(self.context)
+        embeddings = self.embed(paragraphs)
         # Add the document to the document manager
         self.add_document(Document(paragraphs,embeddings,path))
+
+    # Load the text from a file as a context
+    def load_context_from_raw_text(self, raw_text: str) -> None:
+         # Load all paragraphs from a file
+        paragraphs = split_paragraphs(raw_text)
+        # Calculate the embeddings from all paragraphs
+        embeddings = self.embed(paragraphs)
+        # Add the document to the document manager
+        self.add_document(Document(paragraphs,embeddings,"raw_text"))
 
 class Chatbot(Knowledge):
     def __init__(self, cfg: Config):
