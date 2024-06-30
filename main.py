@@ -1,29 +1,37 @@
 import gradio as gr
-from core import AskMeAnything
+from core import AskMeAnything, Config
+from argparse import ArgumentParser, BooleanOptionalAction
 
-model = AskMeAnything()
+parser = ArgumentParser()
+
+parser.add_argument("--gpu",type=bool,action=BooleanOptionalAction,help="flag to use gpu or not")
+parser.add_argument("--use_memory",type=bool,action=BooleanOptionalAction,help="use memory")
+parser.add_argument("--share",type=bool,action=BooleanOptionalAction,help="share gradio link")
+
+args = parser.parse_args()
+
+
+model = AskMeAnything(Config(gpu=args.gpu,use_memory=args.use_memory))
 
 
 def load_document(file, url):
     if url is not None and url != "":
         model.load_context_from_wiki(url)
-        model.save_current_context()
         return "Document loaded. You can now ask questions."
     if file is not None:
         model.load_context_from_txt(file.name)
-        model.save_current_context()
         return "Document loaded. You can now ask questions."
     return "No context was loaded"
 
 
 # Function to generate answers based on the document
-def ask_question(question, audio, best,use_memory):
+def ask_question(question, audio, best):
     answers = ""
     if audio is not None and question == "":
         sampling_rate, audio_arr = audio
         question = model.transcript(audio_arr,sampling_rate)
 
-    answers = model.answer(question, best,use_memory)
+    answers = model.answer(question, best)
     
     if not best:
         answers = "\n".join([f"{i+1}. {ans}" for i, ans in enumerate(answers)])
@@ -41,15 +49,13 @@ text_input = gr.Textbox(
 audio_input = gr.Audio(sources=["microphone"])
 best_flag_input = gr.Checkbox(
     label="Best Answer", info="Just give the best answer", value=True)
-use_memory_input = gr.Checkbox(
-    label="Memory", info="Use memory", value=False)
 text_question_ref = gr.Textbox(label="Your question was:")
 text_output = gr.Textbox(label="Possible Answers:")
 audio_output =gr.Audio()
 
 iface = gr.Interface(
     fn=ask_question,
-    inputs=[text_input, audio_input, best_flag_input,use_memory_input],
+    inputs=[text_input, audio_input, best_flag_input],
     outputs=[text_question_ref,text_output,audio_output],
     examples=[["What is physics?"],["What is mathematics?"],["What is chemistry?"]],
     title="Document Q&A Chatbot",
@@ -70,4 +76,4 @@ iface_upload = gr.Interface(
 app = gr.TabbedInterface([iface_upload, iface], [
                          "Upload Document", "Ask Questions"])
 
-app.launch(server_name="0.0.0.0", server_port=8080)
+app.launch(server_name="0.0.0.0", server_port=8080,share=args.share)
