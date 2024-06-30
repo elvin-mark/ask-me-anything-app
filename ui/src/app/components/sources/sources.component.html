@@ -1,0 +1,54 @@
+<div class="w-[900px]">
+  <button
+    class="flex items-center space-x-2 bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
+    [matMenuTriggerFor]="menu"
+  >
+    <svg
+      class="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 4v16m8-8H4"
+      ></path>
+    </svg>
+    <span>Add New Source</span>
+  </button>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="openRawText()">Raw Text</button>
+    <button mat-menu-item (click)="openFile()">File</button>
+    <button mat-menu-item (click)="openURL()">URL</button>
+  </mat-menu>
+  <app-file-uploader *ngIf="isNewFile"></app-file-uploader>
+
+  <div class="flex items-center space-x-2" *ngIf="isNewURL">
+    <input
+      type="text"
+      placeholder="Enter your text"
+      class="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button
+      class="bg-blue-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+    >
+      Send
+    </button>
+  </div>
+
+  <div class="flex flex-col items-start space-y-2" *ngIf="isNewRawText">
+    <textarea
+      placeholder="Enter your message"
+      class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+    ></textarea>
+    <button
+      class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+    >
+      Send
+    </button>
+  </div>
+</div>

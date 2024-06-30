@@ -1,0 +1,72 @@
+<div
+  class="flex flex-col bg-white shadow-lg rounded-lg w-full max-w-2xl h-full max-h-screen p-4"
+>
+  <!-- Chat messages area -->
+  <!-- <div class="flex-1 overflow-auto mb-4 space-y-4">
+    <div
+      *ngFor="let message of messages"
+      class="flex items-start space-x-2"
+      [ngClass]="{ 'self-end': message.user === 'user' }"
+    >
+      <div
+        [ngClass]="{
+          'bg-blue-100': message.user === 'bot',
+          'bg-green-100': message.user === 'user'
+        }"
+        class="p-2 rounded-lg"
+      >
+        <p class="text-sm text-gray-700">{{ message.text }}</p>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="flex-1 overflow-auto mb-4 space-y-4">
+    <div
+      *ngFor="let message of messages"
+      class="flex items-start space-x-2"
+      [ngClass]="{ 'self-end': message.user === 'user' }"
+    >
+      <div
+        [ngClass]="{
+          'bg-blue-100': message.user === 'bot',
+          'bg-green-100': message.user === 'user'
+        }"
+        class="relative p-2 rounded-lg flex items-center"
+      >
+        <p class="text-sm text-gray-700">{{ message.text }}</p>
+        <!-- Play button -->
+        <button
+          *ngIf="message.audioUrl"
+          class="ml-2 bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center"
+        >
+          <mat-icon>play_arrow</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input area -->
+  <div class="flex items-center space-x-2">
+    <button
+      class="bg-gray-200 text-gray-500 p-2 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
+      [matMenuTriggerFor]="menu"
+    >
+      <mat-icon>note_add</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item><mat-icon>mic</mat-icon> Audio</button>
+    </mat-menu>
+    <input
+      [(ngModel)]="newMessage"
+      type="text"
+      placeholder="Type a message"
+      class="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button
+      (click)="sendMessage()"
+      class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+    >
+      Send
+    </button>
+  </div>
+</div>

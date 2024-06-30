@@ -1,0 +1,22 @@
+<mat-drawer-container class="flex w-full h-full">
+  <mat-drawer #drawer>
+    <mat-list role="list">
+      <mat-list-item role="listitem">
+        <button mat-button (click)="goTo('sources'); drawer.toggle()">
+          Sources
+        </button>
+      </mat-list-item>
+      <mat-list-item role="listitem">
+        <button mat-button (click)="goTo('interact'); drawer.toggle()">
+          Interact
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div>
+      <button mat-raised-button (click)="drawer.toggle()">Toggle drawer</button>
+      <router-outlet></router-outlet>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
